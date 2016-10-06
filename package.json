@@ -2,7 +2,7 @@
   "name": "crawler-node",
   "version": "0.0.0",
   "scripts": {
-    "test": "NODE_ENV=test mocha ./test/setup.js ./test/*_test.js --colors --reporter min --compilers js:babel-register --require babel-polyfill"
+    "test": "NODE_ENV=test mocha ./test/setup.js ./test/*_test.js --colors --compilers js:babel-register --require babel-polyfill"
   },
   "devDependencies": {
     "babel-cli": "^6.16.0",
