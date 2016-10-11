@@ -2,6 +2,7 @@
   "name": "crawler-node",
   "version": "0.0.0",
   "scripts": {
+    "start": "babel-node ./index.js",
     "test": "NODE_ENV=test mocha ./test/setup.js ./test/*_test.js --colors --compilers js:babel-register --require babel-polyfill"
   },
   "devDependencies": {
@@ -21,6 +22,8 @@
     "colors": "^1.1.2",
     "mocha": "^3.1.0",
     "nodemon": "^1.10.2",
+    "phantom": "^2.1.21",
+    "phantomjs-prebuilt": "^2.1.13",
     "webpack": "^1.13.2"
   }
 }
