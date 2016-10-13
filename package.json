@@ -2,7 +2,8 @@
   "name": "crawler-node",
   "version": "0.0.0",
   "scripts": {
-    "start": "babel-node ./index.js",
+    "start": "babel-node index.js",
+    "compile": "babel index.js --out-dir dist",
     "test": "NODE_ENV=test mocha ./test/setup.js ./test/*_test.js --colors --compilers js:babel-register --require babel-polyfill"
   },
   "devDependencies": {
