@@ -1,6 +1,6 @@
 import { expect, spy } from 'chai';
 
-import { runMiddlewares, delay, filterBySameHost } from '../src/crawler.js';
+import { runMiddlewares, delay, filterBySameHost, runner } from '../src/crawler.js';
 
 describe('crawler', () => {
 
@@ -101,6 +101,54 @@ describe('crawler', () => {
         { host: 'host', path: 'under-host' },
         { path: 'relative-update-host' }
       ]);
+    });
+
+  });
+
+  describe('#runner', () => {
+
+    it('should walk all urls', async () => {
+      const entry = 'http://first-step.com';
+      const iterUrl1 = 'http://somewhere.com';
+      const iterUrl2 = 'http://other-place.com';
+      const urls = [iterUrl1, iterUrl2];
+      const crawler = spy(() => urls.pop());
+
+      await runner(entry, crawler);
+
+      expect(crawler).to.have.been.called.exactly(3);
+      expect(crawler).to.have.been.called.with(entry);
+      expect(crawler).to.have.been.called.with(iterUrl1);
+      expect(crawler).to.have.been.called.with(iterUrl2);
+    });
+
+    it('should walk into pre/post hooks with all urls', async () => {
+      const entry = 'http://first-step.com';
+      const iterUrl1 = 'http://somewhere.com';
+      const iterUrl2 = 'http://other-place.com';
+      const urls = [iterUrl1, iterUrl2];
+      const hooks = {
+        pre: spy(url => url),
+        crawler: spy(() => urls.pop()),
+        post: spy(url => url),
+      };
+
+      await runner(entry, hooks);
+
+      expect(hooks.pre).to.have.been.called.exactly(3);
+      expect(hooks.pre).to.have.been.called.with(entry);
+      expect(hooks.pre).to.have.been.called.with(iterUrl1);
+      expect(hooks.pre).to.have.been.called.with(iterUrl2);
+
+      expect(hooks.crawler).to.have.been.called.exactly(3);
+      expect(hooks.crawler).to.have.been.called.with(entry);
+      expect(hooks.crawler).to.have.been.called.with(iterUrl1);
+      expect(hooks.crawler).to.have.been.called.with(iterUrl2);
+
+      // entry is processed, no need for another post process
+      expect(hooks.post).to.have.been.called.exactly(2);
+      expect(hooks.post).to.have.been.called.with(iterUrl1);
+      expect(hooks.post).to.have.been.called.with(iterUrl2);
     });
 
   });
