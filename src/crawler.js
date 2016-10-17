@@ -1,3 +1,5 @@
+import parse from 'url';
+
 export function delay(...ms) {
   const min = Math.min(...ms);
   const max = Math.max(...ms);
@@ -13,4 +15,16 @@ export async function runMiddlewares(url, ...middlewares) {
     url = await middleware(url);
   }
   return url;
+}
+
+export function filterBySameHost(baseUrlObj, urlObjs) {
+  const { protocol, auth, host } = baseUrlObj;
+
+  if (!Array.isArray(urlObjs)) {
+    urlObjs = Array.prototype.slice.call(arguments, 1);
+  }
+
+  return urlObjs
+  .map(urlObj => typeof urlObj === 'string' ? parse(urlObj) : urlObj)
+  .filter(urlObj => !urlObj.host || urlObj.host === host);
 }

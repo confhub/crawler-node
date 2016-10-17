@@ -1,6 +1,6 @@
 import { expect, spy } from 'chai';
 
-import { runMiddlewares, delay } from '../src/crawler.js';
+import { runMiddlewares, delay, filterBySameHost } from '../src/crawler.js';
 
 describe('crawler', () => {
 
@@ -71,6 +71,36 @@ describe('crawler', () => {
       expect(doModify).to.have.been.called.once.with(url);
       expect(doMoreThing).to.have.been.called.with(modifyUrl);
       expect(result).to.be.equal(modifyUrl);
+    });
+
+  });
+
+  describe('#filterBySameHost', () => {
+
+    it('should keep urls with the same host', () => {
+      const remains = filterBySameHost({ host: 'host' }, [
+        { host: 'host', path: 'under-host' },
+        { host: 'others', path: 'other' },
+        { path: 'relative-update-host' }
+      ]);
+
+      expect(remains).to.be.deep.equal([
+        { host: 'host', path: 'under-host' },
+        { path: 'relative-update-host' }
+      ]);
+    });
+
+    it('should also take non-array variables', () => {
+      const remains = filterBySameHost({ host: 'host' },
+        { host: 'host', path: 'under-host' },
+        { host: 'others', path: 'other' },
+        { path: 'relative-update-host' }
+      );
+
+      expect(remains).to.be.deep.equal([
+        { host: 'host', path: 'under-host' },
+        { path: 'relative-update-host' }
+      ]);
     });
 
   });
