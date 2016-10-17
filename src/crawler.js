@@ -1,9 +1,11 @@
-export function delay(...ms) {
-  const min = Math.min(...ms);
-  const max = Math.max(...ms);
-  return (...args) => new Promise(resolve => {
+import { parse, format } from 'url';
+
+export function delay(min, max) {
+  return new Promise(resolve => {
+    const min = Math.min(min, max);
+    const max = Math.max(min, max);
     const timeout = parseInt(Math.random(max - min)) + min;
-    setTimeout(() => resolve(...args), timeout);
+    setTimeout(() => resolve(), timeout);
   });
 }
 
@@ -15,16 +17,25 @@ export async function runMiddlewares(url, ...middlewares) {
   return url;
 }
 
-export function filterBySameHost(baseUrlObj, urlObjs) {
-  const { protocol, auth, host } = baseUrlObj;
+export function filterBySameHost(baseUrl) {
+  const baseUrlObj = parse(baseUrl);
+  const historySet = new Set([baseUrl]);
 
-  if (!Array.isArray(urlObjs)) {
-    urlObjs = Array.prototype.slice.call(arguments, 1);
+  return function (urlObjs) {
+    if (!Array.isArray(urlObjs)) {
+      urlObjs = Array.prototype.slice.call(arguments);
+    }
+
+    return urlObjs
+    .map(urlObj => typeof urlObj === 'string' ? parse(urlObj) : urlObj)
+    .filter(urlObj => !urlObj.host || urlObj.host === baseUrlObj.host)
+    .map(urlObj => {
+      urlObj.protocol = baseUrlObj.protocol;
+      urlObj.auth = baseUrlObj.auth;
+      urlObj.host = baseUrlObj.host;
+      return format(urlObj);
+    });
   }
-
-  return urlObjs
-  .map(urlObj => typeof urlObj === 'string' ? parse(urlObj) : urlObj)
-  .filter(urlObj => !urlObj.host || urlObj.host === host);
 }
 
 export async function runner(entry, hooks) {

@@ -1,19 +1,8 @@
 import { expect, spy } from 'chai';
 
-import { runMiddlewares, delay, filterBySameHost, runner } from '../src/crawler.js';
+import { runMiddlewares, filterBySameHost, runner } from '../src/crawler.js';
 
 describe('crawler', () => {
-
-  describe('#delay', () => {
-
-    it('should delay and pass args back', async () => {
-      const url = 'http://hostname/pathname';
-      const delayFunc = delay(0, 0);
-      const result = await delayFunc(url);
-      expect(url).to.be.equal(result);
-    });
-
-  });
 
   describe('#runMiddlewares', () => {
 
@@ -78,28 +67,32 @@ describe('crawler', () => {
   describe('#filterBySameHost', () => {
 
     it('should keep urls with the same host', () => {
-      const remains = filterBySameHost({ host: 'host' }, [
-        { host: 'host', path: 'under-host' },
-        { host: 'others', path: 'other' },
-        { path: 'relative-update-host' }
-      ]);
+      const base = 'http://host.com/index.html';
+      const sameDomain = 'http://host.com/sameDomain.html';
+      const sameRelativeDomain = '/relativeDomain.html';
+      const otherHost = 'http://other-place.com';
+
+      const filter = filterBySameHost(base);
+      const remains = filter([sameDomain, sameRelativeDomain, otherHost]);
 
       expect(remains).to.be.deep.equal([
-        { host: 'host', path: 'under-host' },
-        { path: 'relative-update-host' }
+        'http://host.com/sameDomain.html',
+        'http://host.com/relativeDomain.html'
       ]);
     });
 
     it('should also take non-array variables', () => {
-      const remains = filterBySameHost({ host: 'host' },
-        { host: 'host', path: 'under-host' },
-        { host: 'others', path: 'other' },
-        { path: 'relative-update-host' }
-      );
+      const base = 'http://host.com/index.html';
+      const sameDomain = 'http://host.com/sameDomain.html';
+      const sameRelativeDomain = '/relativeDomain.html';
+      const otherHost = 'http://other-place.com';
+
+      const filter = filterBySameHost(base);
+      const remains = filter(sameDomain, sameRelativeDomain, otherHost);
 
       expect(remains).to.be.deep.equal([
-        { host: 'host', path: 'under-host' },
-        { path: 'relative-update-host' }
+        'http://host.com/sameDomain.html',
+        'http://host.com/relativeDomain.html'
       ]);
     });
 
