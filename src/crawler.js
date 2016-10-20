@@ -30,10 +30,23 @@ export function filterBySameHost(baseUrl) {
     .map(urlObj => typeof urlObj === 'string' ? parse(urlObj) : urlObj)
     .filter(urlObj => !urlObj.host || urlObj.host === baseUrlObj.host)
     .map(urlObj => {
-      urlObj.protocol = baseUrlObj.protocol;
-      urlObj.auth = baseUrlObj.auth;
-      urlObj.host = baseUrlObj.host;
-      return format(urlObj);
+      const { protocol, auth, host } = baseUrlObj;
+      const { pathname, search } = urlObj;
+      return format({
+        protocol,
+        auth,
+        host,
+        pathname,
+        search
+      });
+    })
+    .filter(u => {
+      if (historySet.has(u)) {
+        return false;
+      }
+
+      historySet.add(u);
+      return true;
     });
   }
 }
@@ -54,7 +67,7 @@ export async function runner(entry, hooks) {
     if (parsedUrls) {
       const postResults = !!post ? await post(parsedUrls) : parsedUrls;
       if (Array.isArray(postResults)) {
-        queuedUrls = postResults.concat(postResults);
+        queuedUrls = queuedUrls.concat(postResults);
       } else {
         queuedUrls.push(postResults);
       }

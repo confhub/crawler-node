@@ -96,6 +96,41 @@ describe('crawler', () => {
       ]);
     });
 
+    it('should take query parameters', () => {
+      const entryUrl = 'http://www.ithome.com.tw/seminar_list';
+      const queries = [
+        '/seminar_list?page=1',
+        '/seminar_list?page=2'
+      ];
+
+      const filter = filterBySameHost(entryUrl);
+      const remains = filter(queries);
+
+      expect(remains).to.be.deep.equal([
+        'http://www.ithome.com.tw/seminar_list?page=1',
+        'http://www.ithome.com.tw/seminar_list?page=2'
+      ]);
+    });
+
+    it('should remove duplicate urls', () => {
+      const entryUrl = 'http://www.ithome.com.tw/seminar_list';
+      const queries = [
+        'http://www.ithome.com.tw/path',
+        '/path',
+        '/path?page=1',
+        '/some/place'
+      ];
+
+      const filter = filterBySameHost(entryUrl);
+      const remains = filter(queries);
+
+      expect(remains).to.be.deep.equal([
+        'http://www.ithome.com.tw/path',
+        'http://www.ithome.com.tw/path?page=1',
+        'http://www.ithome.com.tw/some/place'
+      ]);
+    });
+
   });
 
   describe('#runner', () => {
