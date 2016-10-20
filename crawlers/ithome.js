@@ -1,28 +1,41 @@
 import { create } from 'phantom';
 import { parse, format } from 'url';
+import { EventEmitter } from 'events';
 
 import { filterBySameHost, runner } from '../src/crawler.js';
 
 const entryUrl = 'http://www.ithome.com.tw/seminar_list';
+const emitter = new EventEmitter();
 
-runner(entryUrl, {
-  crawler,
-  post: filterBySameHost(entryUrl)
-});
+export default emitter;
+
+export async function run() {
+  try {
+    await runner(entryUrl, {
+      crawler,
+      post: filterBySameHost(entryUrl)
+    });
+  } catch (err) {
+    emitter.emit('error', err);
+  }
+}
 
 async function crawler(targetUrl) {
   let phantom;
   let otherPages;
+  emitter.emit('start', targetUrl);
   try {
     phantom = await create();
     const page = await phantom.createPage();
     const status = await page.open(targetUrl);
 
     const channelItems = await page.evaluate(getChannelItems);
+    emitter.emit('complete', channelItems);
     otherPages = await page.evaluate(getPaginations);
   } catch (err) {
-    console.error(err);
+    emitter.emit('error', err);
   } finally {
+    emitter.emit('end', targetUrl);
     phantom.exit();
   }
   return otherPages;
